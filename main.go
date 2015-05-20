@@ -48,5 +48,5 @@ func main() {
 	d := garbageDriver{}
 	h := volumeapi.NewVolumeHandler(d)
 	fmt.Println("Listening on :7878")
-	fmt.Println(h.ListenAndServe(":7878"))
+	fmt.Println(h.ListenAndServe("tcp", ":7878", ""))
 }
