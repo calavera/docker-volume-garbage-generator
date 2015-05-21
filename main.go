@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -9,7 +10,13 @@ import (
 	"github.com/calavera/docker-volume-api"
 )
 
-type garbageDriver struct{}
+var (
+	root = flag.String("root", volumeapi.DefaultDockerRootDirectory, "Docker volumes root directory")
+)
+
+type garbageDriver struct {
+	root string
+}
 
 func (g garbageDriver) Create(r volumeapi.VolumeRequest) volumeapi.VolumeResponse {
 	return volumeapi.VolumeResponse{}
@@ -20,11 +27,11 @@ func (g garbageDriver) Remove(r volumeapi.VolumeRequest) volumeapi.VolumeRespons
 }
 
 func (g garbageDriver) Path(r volumeapi.VolumeRequest) volumeapi.VolumeResponse {
-	return volumeapi.VolumeResponse{Mountpoint: filepath.Join(r.Root, r.Name)}
+	return volumeapi.VolumeResponse{Mountpoint: filepath.Join(g.root, r.Name)}
 }
 
 func (g garbageDriver) Mount(r volumeapi.VolumeRequest) volumeapi.VolumeResponse {
-	p := filepath.Join(r.Root, r.Name)
+	p := filepath.Join(g.root, r.Name)
 
 	if err := os.MkdirAll(p, 0755); err != nil {
 		return volumeapi.VolumeResponse{Err: err}
@@ -38,14 +45,14 @@ func (g garbageDriver) Mount(r volumeapi.VolumeRequest) volumeapi.VolumeResponse
 }
 
 func (g garbageDriver) Umount(r volumeapi.VolumeRequest) volumeapi.VolumeResponse {
-	p := filepath.Join(r.Root, r.Name)
+	p := filepath.Join(g.root, r.Name)
 
 	err := os.RemoveAll(p)
 	return volumeapi.VolumeResponse{Err: err}
 }
 
 func main() {
-	d := garbageDriver{}
+	d := garbageDriver{*root}
 	h := volumeapi.NewVolumeHandler(d)
 	fmt.Println("Listening on :7878")
 	fmt.Println(h.ListenAndServe("tcp", ":7878", ""))
