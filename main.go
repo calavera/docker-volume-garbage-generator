@@ -19,19 +19,23 @@ type garbageDriver struct {
 }
 
 func (g garbageDriver) Create(r volumeapi.VolumeRequest) volumeapi.VolumeResponse {
+	fmt.Printf("Create %v\n", r)
 	return volumeapi.VolumeResponse{}
 }
 
 func (g garbageDriver) Remove(r volumeapi.VolumeRequest) volumeapi.VolumeResponse {
+	fmt.Printf("Remove %v\n", r)
 	return volumeapi.VolumeResponse{}
 }
 
 func (g garbageDriver) Path(r volumeapi.VolumeRequest) volumeapi.VolumeResponse {
+	fmt.Printf("Path %v\n", r)
 	return volumeapi.VolumeResponse{Mountpoint: filepath.Join(g.root, r.Name)}
 }
 
 func (g garbageDriver) Mount(r volumeapi.VolumeRequest) volumeapi.VolumeResponse {
 	p := filepath.Join(g.root, r.Name)
+	fmt.Printf("Mount %s\n", p)
 
 	if err := os.MkdirAll(p, 0755); err != nil {
 		return volumeapi.VolumeResponse{Err: err}
@@ -44,8 +48,9 @@ func (g garbageDriver) Mount(r volumeapi.VolumeRequest) volumeapi.VolumeResponse
 	return volumeapi.VolumeResponse{Mountpoint: p}
 }
 
-func (g garbageDriver) Umount(r volumeapi.VolumeRequest) volumeapi.VolumeResponse {
+func (g garbageDriver) Unmount(r volumeapi.VolumeRequest) volumeapi.VolumeResponse {
 	p := filepath.Join(g.root, r.Name)
+	fmt.Printf("Unmount %s\n", p)
 
 	err := os.RemoveAll(p)
 	return volumeapi.VolumeResponse{Err: err}
